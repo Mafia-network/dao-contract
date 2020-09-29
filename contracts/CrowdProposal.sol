@@ -1,7 +1,7 @@
 pragma solidity ^0.6.10;
 pragma experimental ABIEncoderV2;
 
-import './ICompound.sol';
+import './IMafi.sol';
 
 contract CrowdProposal {
     /// @notice The crowd proposal author
@@ -14,9 +14,9 @@ contract CrowdProposal {
     bytes[] public calldatas;
     string public description;
 
-    /// @notice COMP token contract address
-    address public immutable comp;
-    /// @notice Compound protocol `GovernorAlpha` contract address
+    /// @notice MAFI token contract address
+    address public immutable mafi;
+    /// @notice Mafi protocol `GovernorAlpha` contract address
     address public immutable governor;
 
     /// @notice Governance proposal id
@@ -39,8 +39,8 @@ contract CrowdProposal {
     * @param signatures_ The ordered list of function signatures to be called
     * @param calldatas_ The ordered list of calldata to be passed to each call
     * @param description_ The block at which voting begins: holders must delegate their votes prior to this block
-    * @param comp_ `COMP` token contract address
-    * @param governor_ Compound protocol `GovernorAlpha` contract address
+    * @param mafi_ `MAFI` token contract address
+    * @param governor_ Mafi protocol `GovernorAlpha` contract address
     */
     constructor (
         address payable author_,
@@ -49,7 +49,7 @@ contract CrowdProposal {
         string[] memory signatures_,
         bytes[] memory calldatas_,
         string memory description_,
-        address comp_,
+        address mafi_,
         address governor_
     ) public {
         author = author_;
@@ -61,14 +61,14 @@ contract CrowdProposal {
         calldatas = calldatas_;
         description = description_;
 
-        // Save Compound contracts data
-        comp = comp_;
+        // Save Mafi contracts data
+        mafi = mafi_;
         governor = governor_;
 
         terminated = false;
 
         // Delegate votes to the crowd proposal
-        IComp(comp_).delegate(address(this));
+        IMafi(mafi_).delegate(address(this));
     }
 
     /// @notice Create governance proposal
@@ -83,15 +83,15 @@ contract CrowdProposal {
         return govProposalId;
     }
 
-    /// @notice Terminate the crowd proposal, send back staked COMP tokens
+    /// @notice Terminate the crowd proposal, send back staked MAFI tokens
     function terminate() external {
         require(msg.sender == author, 'CrowdProposal::terminate: only author can terminate');
         require(!terminated, 'CrowdProposal::terminate: proposal has been already terminated');
 
         terminated = true;
 
-        // Transfer staked COMP tokens from the crowd proposal contract back to the author
-        IComp(comp).transfer(author, IComp(comp).balanceOf(address(this)));
+        // Transfer staked MAFI tokens from the crowd proposal contract back to the author
+        IMafi(mafi).transfer(author, IMafi(mafi).balanceOf(address(this)));
 
         emit CrowdProposalTerminated(address(this), author);
     }

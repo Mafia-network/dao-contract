@@ -1,17 +1,17 @@
 pragma solidity ^0.6.10;
 pragma experimental ABIEncoderV2;
 
-import './ICompound.sol';
+import './IMafi.sol';
 import './CrowdProposal.sol';
 
 contract CrowdProposalFactory {
 
-    /// @notice `COMP` token contract address
-    address public immutable comp;
-    /// @notice Compound protocol `GovernorAlpha` contract address
+    /// @notice `MAFI` token contract address
+    address public immutable mafi;
+    /// @notice Mafi protocol `GovernorAlpha` contract address
     address public immutable governor;
-    /// @notice Minimum Comp tokens required to create a crowd proposal
-    uint public immutable compStakeAmount;
+    /// @notice Minimum MAFI tokens required to create a crowd proposal
+    uint public immutable mafiStakeAmount;
 
     /// @notice An event emitted when a crowd proposal is created
     event CrowdProposalCreated (
@@ -26,23 +26,23 @@ contract CrowdProposalFactory {
 
     /**
     * @notice Construct a proposal factory for crowd proposals
-    * @param comp_ `COMP` token contract address
-    * @param governor_ Compound protocol `GovernorAlpha` contract address
-    * @param compStakeAmount_ The minimum amount of Comp tokes required for creation of a crowd proposal
+    * @param mafi_ `MAFI` token contract address
+    * @param governor_ Mafi protocol `GovernorAlpha` contract address
+    * @param mafiStakeAmount_ The minimum amount of MAFI tokes required for creation of a crowd proposal
     */
     constructor(
-        address comp_,
+        address mafi_,
         address governor_,
-        uint compStakeAmount_
+        uint mafiStakeAmount_
     ) public {
-        comp = comp_;
+        mafi = mafi_;
         governor = governor_;
-        compStakeAmount = compStakeAmount_;
+        mafiStakeAmount = mafiStakeAmount_;
     }
 
     /**
     * @notice Create a new crowd proposal
-    * @notice Call `Comp.approve(factory_address, compStakeAmount)` before calling this method
+    * @notice Call `Mafi.approve(factory_address, mafiStakeAmount)` before calling this method
     * @param targets The ordered list of target addresses for calls to be made
     * @param values The ordered list of values (i.e. msg.value) to be passed to the calls to be made
     * @param signatures The ordered list of function signatures to be called
@@ -56,10 +56,10 @@ contract CrowdProposalFactory {
         bytes[] memory calldatas,
         string memory description
     ) external {
-        CrowdProposal proposal = new CrowdProposal(msg.sender, targets, values, signatures, calldatas, description, comp, governor);
+        CrowdProposal proposal = new CrowdProposal(msg.sender, targets, values, signatures, calldatas, description, mafi, governor);
         emit CrowdProposalCreated(address(proposal), msg.sender, targets, values, signatures, calldatas, description);
 
-        // Stake COMP and force proposal to delegate votes to itself
-        IComp(comp).transferFrom(msg.sender, address(proposal), compStakeAmount);
+        // Stake MAFI and force proposal to delegate votes to itself
+        IMafi(mafi).transferFrom(msg.sender, address(proposal), mafiStakeAmount);
     }
 }
